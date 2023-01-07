@@ -70,7 +70,8 @@ class BaseTrainer:
     def start(self):
         self.model.to(self.args.device)
         accuracy_best = 0
-
+        epoch=0
+        self.eval(epoch,'test')
         for epoch in range(self.args.num_train_epochs):
             self.train(epoch)
 
@@ -82,9 +83,6 @@ class BaseTrainer:
 class copyTrainer(BaseTrainer):
     def __init__(self,args, model, train_dataloader, valid_dataloader, test_dataloader):
         super().__init__(args, model, train_dataloader, valid_dataloader, test_dataloader)
-    
-    def copy(self,epoch):
-        
 
     def start(self):
         self.model.to(self.args.device)

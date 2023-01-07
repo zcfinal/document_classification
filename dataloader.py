@@ -2,6 +2,7 @@ from torch.utils.data import DataLoader, Dataset
 import tqdm
 import torch
 import logging
+import jsonlines
 
 def get_dataloader(dataloader):
     return eval(dataloader)
@@ -19,6 +20,60 @@ class NewsDataset(Dataset):
 
     def __len__(self):
         return len(self.data['labels'])
+
+class GPTDataset(torch.utils.data.Dataset):
+    def __init__(self, args, tokenizer):
+        super().__init__()
+        print('Initailize Dataset...')
+        self.dataset = []
+        self.label = []
+        self.tokenizer = tokenizer
+        self.args = args
+        with jsonlines.open('../../data/data_0107.jsonl','r') as f:
+            for line in f:
+                Q = line["Q"]
+                A_human = line["A_human"]
+                A_chatgpt = line["A_chatgpt"]
+                pos = Q + ' ' + A_human
+                neg = Q + ' ' + A_chatgpt
+                self.dataset.append(pos)
+                self.label.append(1)
+                self.dataset.append(neg)
+                self.label.append(0)
+
+        self.dataset = self.tokenizer(self.dataset, return_tensors='pt', padding='max_length', max_length=args.max_length, truncation=True)
+        self.dataset['labels'] = self.label
+        len_data = len(self.label)
+        train_data = {}
+        valid_data = {}
+        test_data = {}
+        for key in self.dataset:
+            train_data[key] = self.dataset[key][:int(0.8*len_data)]
+            valid_data[key] = self.dataset[key][int(0.8*len_data):int(0.9*len_data)]
+            test_data[key] = self.dataset[key][int(0.9*len_data):]
+
+        train_dataset = NewsDataset(train_data)
+        logging.info(f'traindata len:{len(train_dataset)}')
+        valid_dataset = NewsDataset(valid_data)
+        logging.info(f'validdata len:{len(valid_dataset)}')
+        test_dataset = NewsDataset(test_data)
+        logging.info(f'testdata len:{len(test_dataset)}')
+
+        def collate_fn(data):
+            data_batch = {key:[] for key in list(data[0].keys())}
+            for x in data:
+                for key in x:
+                    data_batch[key].append(x[key])
+            for key in data_batch:
+                if key=='labels':
+                    data_batch[key] = torch.LongTensor(data_batch[key])
+                else:
+                    data_batch[key] = torch.stack(data_batch[key],0)
+            return data_batch
+
+        self.train_dataloader = DataLoader(train_dataset, batch_size=self.args.per_device_train_batch_size,shuffle=True,collate_fn=collate_fn)
+        self.valid_dataloader = DataLoader(valid_dataset, batch_size=self.args.per_device_eval_batch_size,collate_fn=collate_fn)
+        self.test_dataloader = DataLoader(test_dataset, batch_size=self.args.per_device_eval_batch_size,collate_fn=collate_fn)
 
 
 class MINDDataset:

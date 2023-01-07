@@ -8,7 +8,7 @@ from parameters import parse_args
 from pathlib import Path
 from sklearn.model_selection import train_test_split
 from transformers.file_utils import is_tf_available, is_torch_available
-from transformers import BertTokenizerFast, BertForSequenceClassification
+from transformers import BertTokenizerFast, BertForSequenceClassification, RobertaTokenizer, RobertaForSequenceClassification
 from transformers import Trainer, TrainingArguments
 from utils import set_seed, setuplogging
 from utils import compute_metrics
@@ -22,11 +22,14 @@ def main(args):
 
     set_seed(args.seed)
 
-    tokenizer = BertTokenizerFast.from_pretrained(("bert-base-uncased"))
+    tokenizer = RobertaTokenizer.from_pretrained(args.model_name)
     dataset = get_dataloader(args.dataset)(args,tokenizer)
 
-    model = BertForSequenceClassification.from_pretrained(("bert-base-uncased"), num_labels=len(dataset.cate2id)).to(
-        device)
+    model = RobertaForSequenceClassification.from_pretrained(args.model_name).to(device)
+    if args.load_model_path is not None:
+        print('load model')
+        state = torch.load(args.load_model_path)['model_state_dict']
+        model.load_state_dict(state,strict=False)
 
     trainer = get_trainer(args.trainer)(args,model,dataset.train_dataloader,dataset.valid_dataloader,dataset.test_dataloader)
     trainer.start()
