@@ -25,7 +25,7 @@ def main(args):
     tokenizer =get_tokenizer(args.tokenizer_name)
     dataset = get_dataloader(args.dataset)(args,tokenizer)
 
-    model = get_model(args.model_name).to(device)
+    model = get_model(args.model_name)
     if args.load_model_path is not None:
         print('load model')
         state = torch.load(args.load_model_path)['model_state_dict']

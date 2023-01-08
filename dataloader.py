@@ -130,6 +130,46 @@ class Kfold_GPTDataset(torch.utils.data.Dataset):
         self.train_dataloader = DataLoader(train_dataset, batch_size=self.args.per_device_train_batch_size,shuffle=True,collate_fn=collate_fn)
         self.test_dataloader = DataLoader(test_dataset, batch_size=self.args.per_device_eval_batch_size,collate_fn=collate_fn)
 
+class Kfold_TFIDFDataset(torch.utils.data.Dataset):
+    def __init__(self, args, tokenizer):
+        super().__init__()
+        print('Initailize Dataset...')
+        self.dataset = {'input':[]}
+        self.label = []
+        self.tokenizer = tokenizer
+        self.args = args
+        self.kfold=args.kfold
+        with jsonlines.open('../../data/data_0107.jsonl','r') as f:
+            for line in f:
+                Q = line["Q"]
+                A_human = line["A_human"]
+                A_chatgpt = line["A_chatgpt"]
+                pos = Q + ' ' + A_human
+                neg = Q + ' ' + A_chatgpt
+                self.dataset['input'].append(pos)
+                self.label.append(1)
+                self.dataset['input'].append(neg)
+                self.label.append(0)
+
+        self.dataset['labels'] = self.label
+        
+    def get_kfold(self,k):
+        len_data = len(self.label)
+        fold_size = len_data//self.kfold
+        train_data = {}
+        test_data = {}
+
+        for key in self.dataset:
+            train_data[key] = self.dataset[key][:k*fold_size]+ self.dataset[key][(k+1)*fold_size:]
+            test_data[key] = self.dataset[key][k*fold_size:(k+1)*fold_size]
+
+        train_data['input'] = self.tokenizer.fit_transform(train_data['input'])
+        logging.info(f'traindata len:{len(train_data["labels"])}')
+        test_data['input'] = self.tokenizer.transform(test_data['input'])
+        logging.info(f'testdata len:{len(test_data["labels"])}')
+
+        self.train_dataloader = train_data
+        self.test_dataloader = test_data
 
 
 class MINDDataset:
