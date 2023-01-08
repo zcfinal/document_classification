@@ -3,12 +3,12 @@ import torch
 import random
 import numpy as np
 import logging
+from model import get_model, get_tokenizer
 from dataloader import get_dataloader
 from parameters import parse_args
 from pathlib import Path
 from sklearn.model_selection import train_test_split
 from transformers.file_utils import is_tf_available, is_torch_available
-from transformers import BertTokenizerFast, BertForSequenceClassification, RobertaTokenizer, RobertaForSequenceClassification
 from transformers import Trainer, TrainingArguments
 from utils import set_seed, setuplogging
 from utils import compute_metrics
@@ -22,16 +22,16 @@ def main(args):
 
     set_seed(args.seed)
 
-    tokenizer = RobertaTokenizer.from_pretrained(args.model_name)
+    tokenizer =get_tokenizer(args.tokenizer_name)
     dataset = get_dataloader(args.dataset)(args,tokenizer)
 
-    model = RobertaForSequenceClassification.from_pretrained(args.model_name).to(device)
+    model = get_model(args.model_name).to(device)
     if args.load_model_path is not None:
         print('load model')
         state = torch.load(args.load_model_path)['model_state_dict']
         model.load_state_dict(state,strict=False)
 
-    trainer = get_trainer(args.trainer)(args,model,dataset.train_dataloader,dataset.valid_dataloader,dataset.test_dataloader)
+    trainer = get_trainer(args.trainer)(args,model,dataset)
     trainer.start()
 
 if __name__=='__main__':

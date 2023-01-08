@@ -11,6 +11,7 @@ def parse_args():
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--model_dir", type=str, default=None)
     parser.add_argument("--model_name", type=str, default=None)
+    parser.add_argument("--tokenizer_name", type=str, default=None)
     parser.add_argument('--load_model_path',type=str, default=None)
     parser.add_argument("--log_dir", type=str, default=None)
     parser.add_argument("--trainer", type=str, default='BaseTrainer')
@@ -24,6 +25,7 @@ def parse_args():
     parser.add_argument("--learning_rate", type=float, default=0.00005)
     parser.add_argument("--logging_steps", type=int, default=50)
     parser.add_argument("--eval_steps", type=int, default=50)
+    parser.add_argument("--kfold",type=int,default=5)
 
     args = parser.parse_args()
     return args
