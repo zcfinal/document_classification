@@ -16,9 +16,9 @@ from trainer import get_trainer
 
 
 def main(args):
-    os.environ["CUDA_VISIBLE_DEVICES"] = args.device
+    # os.environ["CUDA_VISIBLE_DEVICES"] = args.device
     device = torch.device('cuda')
-    print(torch.cuda.current_device())
+    # print(torch.cuda.current_device())
 
     set_seed(args.seed)
 

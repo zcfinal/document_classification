@@ -7,7 +7,7 @@ import logging
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--max_length", type=int, default=None)
-    parser.add_argument("--device", type=str, default="cuda:0")
+    parser.add_argument("--device", type=str, default="cuda")
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--model_dir", type=str, default=None)
     parser.add_argument("--model_name", type=str, default=None)
@@ -26,6 +26,8 @@ def parse_args():
     parser.add_argument("--logging_steps", type=int, default=50)
     parser.add_argument("--eval_steps", type=int, default=50)
     parser.add_argument("--kfold",type=int,default=5)
+
+    parser.add_argument("--question_feature", action='store_true', default=False)
 
     args = parser.parse_args()
     return args
