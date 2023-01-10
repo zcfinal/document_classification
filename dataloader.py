@@ -91,19 +91,41 @@ class Kfold_GPTDataset(torch.utils.data.Dataset):
         self.tokenizer = tokenizer
         self.args = args
         self.kfold=args.kfold
-        with jsonlines.open('../final_data/data_0109.jsonl','r') as f:
+        # with jsonlines.open('../final_data/data_0109.jsonl','r') as f:
+        #     for line in f:
+        #         Q = line["Q"]
+        #         A_human = line["A_human"]
+        #         A_chatgpt = line["A_chatgpt"]
+        #         Q_human = line["Q_human"]
+        #         Q_chatgpt = line["Q_chatgpt"]
+        #         if args.question_feature:
+        #             pos = Q + '' + Q_human +' ' + A_human
+        #             neg = Q + '' + Q_chatgpt + ' ' + A_chatgpt
+        #         else:
+        #             pos = Q + ' ' + A_human
+        #             neg = Q + ' ' + A_chatgpt
+        #         self.dataset.append(pos)
+        #         self.label.append(1)
+        #         self.dataset.append(neg)
+        #         self.label.append(0)
+        with jsonlines.open('../final_data/paired_short.jsonl','r') as f:
             for line in f:
-                Q = line["Q"]
-                A_human = line["A_human"]
-                A_chatgpt = line["A_chatgpt"]
-                Q_human = line["Q_human"]
-                Q_chatgpt = line["Q_chatgpt"]
+                features,text = list(line.items())[0]
+                human_text = text["human_text"]
+                chatgpt_text = text["chatgpt_text"]
                 if args.question_feature:
-                    pos = Q + '' + Q_human +' ' + A_human
-                    neg = Q + '' + Q_chatgpt + ' ' + A_chatgpt
+                    for i in range(len(features)):
+                        if features[i] == ',' or features[i] == '.' :
+                            break
+                    pos = human_text
+                    neg = chatgpt_text
+                    if '1' in features[:i] or 'first' in features[:i]:
+                        neg = features[:i] +' ' + neg
+                    elif '2' in features[:i] or 'second' in features[:i]:
+                        pos = features[:i] +' ' + pos
                 else:
-                    pos = Q + ' ' + A_human
-                    neg = Q + ' ' + A_chatgpt
+                    pos = human_text
+                    neg = chatgpt_text
                 self.dataset.append(pos)
                 self.label.append(1)
                 self.dataset.append(neg)
@@ -151,19 +173,41 @@ class Kfold_TFIDFDataset(torch.utils.data.Dataset):
         self.tokenizer = tokenizer
         self.args = args
         self.kfold=args.kfold
-        with jsonlines.open('../final_data/data_0109.jsonl','r') as f:
+        # with jsonlines.open('../final_data/data_0109.jsonl','r') as f:
+        #     for line in f:
+        #         Q = line["Q"]
+        #         A_human = line["A_human"]
+        #         A_chatgpt = line["A_chatgpt"]
+        #         Q_human = line["Q_human"]
+        #         Q_chatgpt = line["Q_chatgpt"]
+        #         if args.question_feature:
+        #             pos = Q + '' + Q_human +' ' + A_human
+        #             neg = Q + '' + Q_chatgpt + ' ' + A_chatgpt
+        #         else:
+        #             pos = Q + ' ' + A_human
+        #             neg = Q + ' ' + A_chatgpt
+        #         self.dataset['input'].append(pos)
+        #         self.label.append(1)
+        #         self.dataset['input'].append(neg)
+        #         self.label.append(0)
+        with jsonlines.open('../final_data/paired_short.jsonl','r') as f:
             for line in f:
-                Q = line["Q"]
-                A_human = line["A_human"]
-                A_chatgpt = line["A_chatgpt"]
-                Q_human = line["Q_human"]
-                Q_chatgpt = line["Q_chatgpt"]
+                features,text = list(line.items())[0]
+                human_text = text["human_text"]
+                chatgpt_text = text["chatgpt_text"]
                 if args.question_feature:
-                    pos = Q + '' + Q_human +' ' + A_human
-                    neg = Q + '' + Q_chatgpt + ' ' + A_chatgpt
+                    for i in range(len(features)):
+                        if features[i] == ',' or features[i] == '.' :
+                            break
+                    pos = human_text
+                    neg = chatgpt_text
+                    if '1' in features[:i] or 'first' in features[:i]:
+                        neg = features[:i] +' ' + neg
+                    elif '2' in features[:i] or 'second' in features[:i]:
+                        pos = features[:i] +' ' + pos
                 else:
-                    pos = Q + ' ' + A_human
-                    neg = Q + ' ' + A_chatgpt
+                    pos = human_text
+                    neg = chatgpt_text
                 self.dataset['input'].append(pos)
                 self.label.append(1)
                 self.dataset['input'].append(neg)

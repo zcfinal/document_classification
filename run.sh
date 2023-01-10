@@ -6,7 +6,6 @@
 # tokenizer_name=tf-idf
 # trainer=KfoldTFIDFTrainer
 # dataset=Kfold_TFIDFDataset
-# #load_model_path=/home/v-chaozhang/gpt_detect/model/detector-base.pt
 
 # python main.py --max_length ${max_length} \
 # --model_dir ${model_dir} \
@@ -14,8 +13,8 @@
 # --model_name ${model_name} \
 # --trainer ${trainer} \
 # --dataset ${dataset} \
-# --tokenizer_name ${tokenizer_name} 
-#--load_model_path ${load_model_path} 
+# --tokenizer_name ${tokenizer_name} \
+# # --question_feature \
 
 
 exp=gpt2-pretrain
@@ -26,7 +25,7 @@ model_name=roberta-base
 tokenizer_name=roberta-base
 trainer=KfoldTrainer
 dataset=Kfold_GPTDataset
-# load_model_path=/home/v-derongxu/gpt_detect/model/detector-base.pt
+load_model_path=/home/v-derongxu/others/gpt-2-output-dataset/detector-base.pt
 
 
 python main.py --max_length ${max_length} \
@@ -36,5 +35,5 @@ python main.py --max_length ${max_length} \
 --trainer ${trainer} \
 --dataset ${dataset} \
 --tokenizer_name ${tokenizer_name} \
---question_feature \
-# --load_model_path ${load_model_path} 
+# --question_feature \
+--load_model_path ${load_model_path} 
